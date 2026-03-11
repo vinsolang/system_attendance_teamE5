@@ -1,0 +1,2 @@
+npm install lucide-react chart.js react-chartjs-2
+npm install tailwindcss @tailwindcss/vite

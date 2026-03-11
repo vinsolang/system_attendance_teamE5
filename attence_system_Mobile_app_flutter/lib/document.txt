@@ -1,0 +1,4 @@
+1. Use command 
+- flutter pub get
+- flutter pub add mobile_scanner
+- flutter pub add image_picker
