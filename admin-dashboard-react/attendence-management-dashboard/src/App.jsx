@@ -14,7 +14,9 @@ import ProtectedRoute from './auth/ProtectedRoute';
 
 function App() {
   return (
-    <Router>
+    <>
+     <div className='hidden lg:block'>
+       <Router>
       <Routes>
         {/* Public Routes */}
         <Route path="/signin" element={<SignIn />} />
@@ -24,8 +26,8 @@ function App() {
         <Route
           path="/admin/*"
           element={
-            // <ProtectedRoute>
-              <div className="hidden lg:flex bg-gray-50 font-['Inter'] min-h-screen">
+            <ProtectedRoute>
+              <div className="flex bg-gray-50 font-['Inter'] min-h-screen">
                 <Sidebar />
                 <div className="flex-1 flex flex-col">
                   <Navbar />
@@ -42,7 +44,7 @@ function App() {
                   </main>
                 </div>
               </div>
-            // </ProtectedRoute>
+             </ProtectedRoute>
           }
         />
 
@@ -57,6 +59,11 @@ function App() {
         />
       </Routes>
     </Router>
+     </div>
+     <div className='lg:hidden flex justify-center items-center min-h-screen'>
+      <h1 className='text-blue-800 font-bold'>Is Not Allow on your device this</h1>
+     </div>
+    </>
   );
 }
 

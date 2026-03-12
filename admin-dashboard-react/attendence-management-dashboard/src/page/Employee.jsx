@@ -106,7 +106,7 @@ const Employee = () => {
                   </td>
                   <td className="px-8 py-5 text-right">
                     <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-2 text-gray-400 hover:text-gray-800 hover:bg-white rounded-lg transition-all shadow-sm">
+                      <button className="p-2 text-gray-400 hover:text-blue-500 hover:bg-white rounded-lg transition-all shadow-sm">
                         <i className="fas fa-edit text-xs"></i>
                       </button>
                       <button className="p-2 text-gray-400 hover:text-red-500 hover:bg-white rounded-lg transition-all shadow-sm">

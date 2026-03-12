@@ -3,18 +3,36 @@ import React, { useState, useRef, useEffect } from "react";
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const dropdownRef = useRef();
 
-  // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    const userEmail = localStorage.getItem("email");
+
+    if (userEmail) {
+      setEmail(userEmail);
+
+      fetch(`http://localhost:8080/api/auth/me?email=${userEmail}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setName(data.firstName + " " + data.lastName);
+          setEmail(data.email);
+        })
+        .catch((error) => console.error(error));
+    }
   }, []);
+
+  const handleLogout = async () => {
+    await fetch("http://localhost:8080/api/auth/logout", {
+      method: "POST",
+    });
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("email");
+
+    window.location.href = "/signin";
+  };
 
   return (
     <>
@@ -28,16 +46,15 @@ const Navbar = () => {
             onClick={() => setOpen(!open)}
             className="flex items-center gap-2 focus:outline-none"
           >
-            <span className="text-gray-600 font-medium">Admin</span>
+            <span className="text-gray-600 font-medium">{email}</span>
             <span className="text-gray-500">▼</span>
           </button>
 
-          {/* Dropdown */}
           {open && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden z-50">
               <div className="px-4 py-3 border-b border-gray-100">
-                <p className="text-gray-700 font-semibold">Admin Name</p>
-                <p className="text-gray-400 text-sm">admin@example.com</p>
+                <p className="text-gray-700 font-semibold">{name}</p>
+                <p className="text-gray-400 text-sm">{email}</p>
               </div>
 
               <button
@@ -51,9 +68,8 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Logout Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/60 bg-opacity-40 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-lg w-96 p-6">
             <h2 className="text-lg font-semibold mb-4">Confirm Logout</h2>
             <p className="text-gray-600 mb-6">
@@ -69,10 +85,7 @@ const Navbar = () => {
               </button>
 
               <button
-                onClick={() => {
-                  alert("Logged out!");
-                  setShowModal(false);
-                }}
+                onClick={handleLogout}
                 className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600"
               >
                 Logout
