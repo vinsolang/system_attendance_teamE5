@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Toaster, toast } from "sonner";
 
-const EmployeeModal = ({ isOpen, onClose }) => {
+
+const EmployeeModal = ({ isOpen, onClose, employee, refreshEmployees }) => {
   const [profileImage, setProfileImage] = useState(null);
   const [preview, setPreview] = useState(null);
 
@@ -24,40 +26,77 @@ const EmployeeModal = ({ isOpen, onClose }) => {
     e.preventDefault();
 
     const formData = new FormData();
+    // Ensure names match your Backend @RequestParam or DTO names exactly
     formData.append("fullName", fullName);
     formData.append("employeeId", employeeId);
     formData.append("department", department);
     formData.append("position", position);
     formData.append("joinDate", joinDate);
     formData.append("workStatus", workStatus);
-    if (profileImage) formData.append("profileImage", profileImage);
+    
+    // Only append the image if a NEW one was selected
+    if (profileImage) {
+      formData.append("image", profileImage);
+    }
 
     try {
-      const res = await fetch("http://localhost:8080/api/employees/add", {
-        method: "POST",
-        body: formData,
+      const url = employee
+        ? `http://localhost:8080/api/employees/${employee.id}`
+        : "http://localhost:8080/api/employees/add";
+
+      // If PUT doesn't work, try changing this to POST just to test
+      const method = employee ? "PUT" : "POST"; 
+
+      const res = await fetch(url, {
+        method: method,
+        body: formData, // Browser sets Content-Type automatically
       });
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        alert("Error: " + errorText);
-        return;
-      }
+      if (res.ok) {
 
-      const data = await res.json();
-      console.log("Saved employee:", data);
-      alert("Employee added successfully!");
-      onClose(); // close modal
+      toast.success(
+        employee ? "Updated Successfully!" : "Added Successfully!"
+      );
+
+      refreshEmployees();
+      onClose();
+
+    } else {
+      const errorData = await res.text();
+
+      toast.error("Failed to save: " + errorData);
+    }
     } catch (err) {
-      console.error(err);
-      alert("Error adding employee");
+      console.error("Fetch Error:", err);
     }
   };
+
+  // CORRECT: Move this BEFORE the "if (!isOpen)" return
+  useEffect(() => {
+    if (employee) {
+      setFullName(employee.fullName);
+      setEmployeeId(employee.employeeId);
+      setDepartment(employee.department);
+      setPosition(employee.position);
+      setJoinDate(employee.joinDate);
+      setWorkStatus(employee.workStatus);
+    } else {
+      setFullName("");
+      setEmployeeId("");
+      setDepartment("Sales Department");
+      setPosition("");
+      setJoinDate("");
+      setWorkStatus("Active");
+      setPreview(null);
+      setProfileImage(null);
+    }
+  }, [employee, isOpen]); // Added isOpen as a dependency to reset when opening/closing
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <Toaster position="top-right" />
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-gray-900/40 backdrop-blur-md transition-opacity"
@@ -88,14 +127,19 @@ const EmployeeModal = ({ isOpen, onClose }) => {
         <form onSubmit={handleSubmit} className="p-8 pt-4 space-y-6">
           {/* Profile Upload */}
           <div className="flex flex-col items-center mb-6">
-            <div className="w-28 h-28 rounded-full overflow-hidden bg-gray-100 border-4 border-white shadow-lg">
+           <div className="w-28 h-28 rounded-full overflow-hidden bg-gray-100 border-4 border-white shadow-lg">
               {preview ? (
-                <img
-                  src={preview}
-                  alt="profile"
-                  className="w-full h-full object-cover"
+                // Priority 1: New upload preview
+                <img src={preview} alt="preview" className="w-full h-full object-cover" />
+              ) : employee && employee.profileImageUrl ? (
+                // Priority 2: Existing image from server
+                <img 
+                  src={`http://localhost:8080/${employee.profileImageUrl}`} 
+                  alt="existing" 
+                  className="w-full h-full object-cover" 
                 />
               ) : (
+                // Priority 3: Default icon
                 <div className="w-full h-full flex items-center justify-center text-gray-400">
                   <i className="fas fa-user text-2xl"></i>
                 </div>
@@ -211,7 +255,7 @@ const EmployeeModal = ({ isOpen, onClose }) => {
               type="submit"
               className="flex-[2] bg-gray-800 text-white font-bold py-4 rounded-2xl hover:bg-black shadow-lg shadow-gray-300 transition-all"
             >
-              Save Employee
+              {employee ? "Update Employee" : "Save Employee"}
             </button>
           </div>
         </form>

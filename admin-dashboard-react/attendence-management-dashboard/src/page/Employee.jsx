@@ -1,19 +1,71 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect  } from 'react';
 import EmployeeModal from './EmployeeModal';
+import { Toaster, toast } from "sonner";
+import Swal from "sweetalert2";
 
 const Employee = () => {
-    const [isModalOpen, setModalOpen] = useState(false);
-  // Mock data for employee list
-  const employees = [
-    { id: '001', name: 'Sreyna Paul', role: 'Sales Executive', dept: 'Sales', joinDate: 'Jan 2024', status: 'Active' },
-    { id: '002', name: 'Sok Mean', role: 'Manager', dept: 'Operations', joinDate: 'Mar 2023', status: 'Active' },
-    { id: '003', name: 'Vichea Vy', role: 'Developer', dept: 'IT', joinDate: 'Feb 2024', status: 'On Leave' },
-    { id: '004', name: 'Leakhana K.', role: 'Accountant', dept: 'Finance', joinDate: 'Nov 2022', status: 'Active' },
-  ];
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [employees, setEmployees] = useState([]);
+  const [editingEmployee, setEditingEmployee] = useState(null);
 
+  const fetchEmployees = async () => {
+  try {
+      const res = await fetch("http://localhost:8080/api/employees");
+      const data = await res.json();
+      setEmployees(data);
+    } catch (err) {
+      console.error("Failed to load employees", err);
+    }
+  };
+  useEffect(() => {
+    fetchEmployees();
+    }, []);
+    
+   const handleDelete = async (id) => {
+
+      const result = await Swal.fire({
+        text: "Do you when to delete employee this?",
+        showCancelButton: true,
+        confirmButtonColor: "#e8000c",
+        cancelButtonColor: "#5682e8",
+        confirmButtonText: "Yes, delete"
+      });
+
+      if (!result.isConfirmed) return;
+
+      const res = await fetch(`http://localhost:8080/api/employees/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        toast.success("Employee deleted successfully");
+        fetchEmployees();
+      } else {
+        toast.error("Failed to delete employee");
+      }
+    };
+
+  // Calculate the Stats
+  // 1. Total Staff: Simply the length of the array
+  const totalStaff = employees.length;
+
+  // 2. Departments: Create a Set of unique department names and get the size
+  const totalDepartments = new Set(employees.map(emp => emp.department)).size;
+
+  // 3. Active Now: Filter employees with 'Active' status
+  const activeStaff = employees.filter(emp => emp.workStatus === 'Active').length;
+
+  // 4. New Hires: Assuming "New Hires" are those joined in the last 30 days
+  // Or, if you prefer, filter by a specific status like 'Probation'
+  const newHires = employees.filter(emp => {
+    const joinDate = new Date(emp.joinDate);
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return joinDate > thirtyDaysAgo;
+  }).length;
   return (
     <div className="p-8 bg-[#D1D5DB] min-h-screen rounded-tl-[40px] space-y-8">
-      
+      <Toaster position="top-right" />
       {/* Top Action Bar */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -32,35 +84,49 @@ const Employee = () => {
               className="w-full md:w-80 bg-white/60 backdrop-blur-sm border-none rounded-2xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-gray-300 transition-all"
             />
           </div>
-          <button onClick={() => setModalOpen(true)}
-          className="bg-gray-800 text-white p-3 px-6 rounded-2xl flex items-center gap-2 hover:bg-black shadow-lg shadow-gray-400/40 transition-all">
+          <button 
+            onClick={() => {
+              setEditingEmployee(null); // Ensure we aren't in edit mode
+              setModalOpen(true);       // Open the modal
+            }}
+            className="cursor-pointer bg-gray-800 text-white p-3 px-6 rounded-2xl flex items-center gap-2 hover:bg-black shadow-lg shadow-gray-400/40 transition-all">
             <span className="text-lg font-light">+</span>
-            <span className="text-sm font-bold">Add Employee</span>
+            <span className="text-sm font-bold">
+              {editingEmployee ? "Update Employee" : "Add New Employee"}
+            </span>
           </button>
         </div>
         {/* Render the Modal */}
-        <EmployeeModal 
-            isOpen={isModalOpen}
-            onClose={()=>setModalOpen(false)}
-        />
+      <EmployeeModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setEditingEmployee(null);
+        }}
+        employee={editingEmployee}
+        refreshEmployees={fetchEmployees}
+      />
       </div>
 
       {/* Stats Overview */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white/40 border border-white/60 p-4 rounded-3xl flex flex-col items-center">
-          <span className="text-2xl font-black text-gray-800">200</span>
+          <span className="text-2xl font-black text-gray-800">{totalStaff}</span>
           <span className="text-[10px] uppercase font-bold text-gray-500 tracking-widest">Total Staff</span>
         </div>
+        
         <div className="bg-white/40 border border-white/60 p-4 rounded-3xl flex flex-col items-center">
-          <span className="text-2xl font-black text-gray-800">12</span>
+          <span className="text-2xl font-black text-gray-800">{totalDepartments}</span>
           <span className="text-[10px] uppercase font-bold text-gray-500 tracking-widest">Departments</span>
         </div>
+        
         <div className="bg-white/40 border border-white/60 p-4 rounded-3xl flex flex-col items-center">
-          <span className="text-2xl font-black text-green-600">188</span>
+          <span className="text-2xl font-black text-green-600">{activeStaff}</span>
           <span className="text-[10px] uppercase font-bold text-gray-500 tracking-widest">Active Now</span>
         </div>
+        
         <div className="bg-white/40 border border-white/60 p-4 rounded-3xl flex flex-col items-center">
-          <span className="text-2xl font-black text-blue-600">5</span>
+          <span className="text-2xl font-black text-blue-600">{newHires}</span>
           <span className="text-[10px] uppercase font-bold text-gray-500 tracking-widest">New Hires</span>
         </div>
       </div>
@@ -73,43 +139,58 @@ const Employee = () => {
               <tr>
                 <th className="px-8 py-5">Employee Info</th>
                 <th className="px-8 py-5">Department</th>
-                <th className="px-8 py-5">Role</th>
+                <th className="px-8 py-5">Position</th>
                 <th className="px-8 py-5">Status</th>
                 <th className="px-8 py-5 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {employees.map((emp, i) => (
-                <tr key={i} className="group hover:bg-gray-50/80 transition-all duration-300">
+              {employees.map((emp) => (
+                <tr key={emp.id} className="group hover:bg-gray-50/80 transition-all duration-300">
                   <td className="px-8 py-5">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 border border-white shadow-sm flex items-center justify-center text-gray-400 font-bold group-hover:scale-105 transition-transform">
-                        {emp.name.charAt(0)}
+                       {emp.profileImageUrl ? (
+                          <img
+                            src={`http://localhost:8080/${emp.profileImageUrl}`}
+                            alt={emp.fullName}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-lg uppercase">{emp.fullName.charAt(0)}</span>
+                        )}
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-gray-800">{emp.name}</p>
-                        <p className="text-[10px] text-gray-400 font-medium tracking-wide">ID: {emp.id} • Joined {emp.joinDate}</p>
+                        <p className="text-sm font-bold text-gray-800">{emp.fullName}</p>
+                        <p className="text-[10px] text-gray-400 font-medium tracking-wide">ID: {emp.employeeId} • Joined {emp.joinDate}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-8 py-5">
-                    <span className="text-xs font-semibold text-gray-600 px-3 py-1 bg-gray-100 rounded-lg">{emp.dept}</span>
+                    <span className="text-xs font-semibold text-gray-600 px-3 py-1 bg-gray-100 rounded-lg">{emp.department}</span>
                   </td>
                   <td className="px-8 py-5 text-sm text-gray-500 font-medium">
-                    {emp.role}
+                    {emp.position}
                   </td>
                   <td className="px-8 py-5">
                     <div className="flex items-center gap-2">
-                      <div className={`w-1.5 h-1.5 rounded-full ${emp.status === 'Active' ? 'bg-green-500' : 'bg-orange-400'}`}></div>
-                      <span className="text-[11px] font-bold text-gray-700">{emp.status}</span>
+                      <div className={`w-1.5 h-1.5 rounded-full ${emp.workStatus   === 'Active' ? 'bg-green-500' : 'bg-orange-400'}`}></div>
+                      <span className="text-[11px] font-bold text-gray-700">{emp.workStatus }</span>
                     </div>
                   </td>
                   <td className="px-8 py-5 text-right">
                     <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-2 text-gray-400 hover:text-blue-500 hover:bg-white rounded-lg transition-all shadow-sm">
+                      <button 
+                        onClick={() => {
+                          setEditingEmployee(emp);
+                          setModalOpen(true);
+                        }}
+                        className="p-2 text-gray-400 hover:text-blue-500 hover:bg-white rounded-lg transition-all shadow-sm">
                         <i className="fas fa-edit text-xs"></i>
                       </button>
-                      <button className="p-2 text-gray-400 hover:text-red-500 hover:bg-white rounded-lg transition-all shadow-sm">
+                      <button 
+                        onClick={() => handleDelete(emp.id)}
+                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-white rounded-lg transition-all shadow-sm">
                         <i className="fas fa-trash text-xs"></i>
                       </button>
                     </div>

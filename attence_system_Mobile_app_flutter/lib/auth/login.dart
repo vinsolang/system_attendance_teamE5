@@ -1,7 +1,35 @@
+import 'dart:convert';
 import 'package:attence_system/auth/forgotpassword.dart';
 import 'package:attence_system/page/home.dart';
 import 'package:attence_system/scanqr/scanqr.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
+Future<bool> loginUser(String email, String password) async {
+  final url = Uri.parse('http://localhost:8080/api/auth/login');
+
+  final response = await http.post(
+    url,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({'email': email, 'password': password}),
+  );
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    print('Login success: ${data['message']}');
+
+    // Save email locally for attendance calls
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('userEmail', email);
+    await prefs.setString('userRole', data['role']);
+
+    return true;
+  } else {
+    print('Login failed: ${response.body}');
+    return false;
+  }
+}
 
 class SignInScreen extends StatelessWidget {
   const SignInScreen({super.key});
