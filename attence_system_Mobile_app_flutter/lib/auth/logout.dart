@@ -1,5 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
+Future<void> logout(BuildContext context) async {
+  const String baseUrl = "http://10.0.2.2:8080"; // Android emulator
+
+  try {
+    final response = await http.post(
+      Uri.parse("$baseUrl/api/logout"),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    );
+
+    if (response.statusCode == 200) {
+
+      // Navigate to SignInScreen and remove all routes
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/signin',
+        (route) => false,
+      );
+
+    } else {
+      print("Logout failed");
+    }
+  } catch (e) {
+    print("Logout Error: $e");
+  }
+}
 class SignOutScreen extends StatelessWidget {
   const SignOutScreen({super.key});
 
@@ -62,19 +90,13 @@ class SignOutScreen extends StatelessWidget {
                     const SizedBox(height: 40),
 
                     // --- YES BUTTON ---
-                    _buildConfirmationButton(
+                   _buildConfirmationButton(
                       label: 'Yes',
                       color: buttonColor,
                       onTap: () {
-                        // Navigate back to Welcome and clear history
-                        Navigator.pushNamedAndRemoveUntil(
-                          context, 
-                          '/welcome', // Ensure you have this route defined
-                          (route) => false,
-                        );
+                        logout(context);
                       },
                     ),
-
                     const SizedBox(height: 15),
 
                     // --- CANCEL BUTTON ---

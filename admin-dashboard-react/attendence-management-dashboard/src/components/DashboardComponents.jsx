@@ -29,10 +29,10 @@ ChartJS.register(
   BarElement
 );
 // 1. Overview Component (Doughnut Chart)
-export const Overview = ({ total = 458 }) => {
+export const Overview = ({ total = 7 }) => {
   const data = {
     datasets: [{
-      data: [342, 93, 23],
+      data: [7, 5, 7],
       backgroundColor: ['#3B82F6', '#EF4444', '#84A98C'],
       borderWidth: 0,
       hoverOffset: 4
@@ -58,9 +58,9 @@ export const AttendanceStats = () => (
   <div className="col-span-9 bg-[#E5E5E5] p-8 rounded-[2.5rem] shadow-sm">
     <h3 className="text-xl font-bold text-gray-800 mb-6">Attendance</h3>
     <div className="grid grid-cols-3 gap-6">
-      <StatCard count="342" label="Checked In" color="text-gray-800" subColor="text-gray-500" bgColor="bg-blue-500" icon={<CheckSquare />} />
-      <StatCard count="93" label="Not Checked In" color="text-gray-800" subColor="text-red-500" bgColor="bg-red-500" icon={<AlertTriangle />} />
-      <StatCard count="23" label="On Leave" color="text-gray-800" subColor="text-green-600" bgColor="bg-[#84A98C]" icon={<Shield />} />
+      <StatCard count="7" label="Checked In" color="text-gray-800" subColor="text-gray-500" bgColor="bg-blue-500" icon={<CheckSquare />} />
+      <StatCard count="6" label="Not Checked In" color="text-gray-800" subColor="text-red-500" bgColor="bg-red-500" icon={<AlertTriangle />} />
+      <StatCard count="7" label="On Leave" color="text-gray-800" subColor="text-green-600" bgColor="bg-[#84A98C]" icon={<Shield />} />
     </div>
   </div>
 );
@@ -122,13 +122,13 @@ export const DailyRecords = () => {
 // 4. Attendance Source Component
 export const AttendanceSource = () => {
   const sources = [
-    { label: 'App Scan', count: 148, icon: <Maximize /> },
-    { label: 'Fingerprint', count: 49, icon: <Eye /> },
-    { label: 'Face ID', count: 67, icon: <User /> },
-    { label: 'Team lead', count: 78, icon: <UsersIcon /> },
+    { label: 'App Scan', count: 7, icon: <Maximize /> },
+    { label: 'Fingerprint', count: 6, icon: <Eye /> },
+    { label: 'Face ID', count: 0, icon: <User /> },
+    { label: 'Team lead', count: 7, icon: <UsersIcon /> },
   ];
 
-  return (
+  return ( 
     <div className="col-span-8 bg-[#E5E5E5] p-8 rounded-[2.5rem] shadow-sm">
       <h3 className="text-xl font-bold text-gray-800 mb-6">Attendance source</h3>
       <div className="grid grid-cols-2 gap-6">

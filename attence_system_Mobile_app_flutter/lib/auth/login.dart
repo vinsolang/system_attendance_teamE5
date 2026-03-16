@@ -6,36 +6,41 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+// login.dart logic snippet
 Future<bool> loginUser(String email, String password) async {
-  final url = Uri.parse('http://localhost:8080/api/auth/login');
+  try {
+    final url = Uri.parse('http://192.168.3.26:8080/api/employees/login');
 
-  final response = await http.post(
-    url,
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({'email': email, 'password': password}),
-  );
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'password': password}),
+    );
 
-  if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    print('Login success: ${data['message']}');
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
 
-    // Save email locally for attendance calls
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('userEmail', email);
-    await prefs.setString('userRole', data['role']);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('userEmail', email);
+      await prefs.setString('userRole', data['role'] ?? '');
 
-    return true;
-  } else {
-    print('Login failed: ${response.body}');
+      return true;
+    } else {
+      return false;
+    }
+  } catch (e) {
+    print("Login error: $e");
     return false;
   }
 }
 
 class SignInScreen extends StatelessWidget {
   const SignInScreen({super.key});
-
+  
   @override
   Widget build(BuildContext context) {
+    final TextEditingController emailController = TextEditingController();
+    final TextEditingController passwordController = TextEditingController();
     return Scaffold(
       backgroundColor: const Color(0xFFF8F6FA), // Match lavender background
       body: SafeArea(
@@ -77,9 +82,18 @@ class SignInScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildInputField(label: 'Email', hint: 'Value'),
+                    _buildInputField(
+                      label: 'Email',
+                      hint: 'Enter email',
+                      controller: emailController,
+                    ),
                     const SizedBox(height: 15),
-                    _buildInputField(label: 'Password', hint: 'Value', isPassword: true),
+                    _buildInputField(
+                      label: 'Password',
+                      hint: 'Enter password',
+                      controller: passwordController,
+                      isPassword: true,
+                    ),
                     const SizedBox(height: 25),
                     
                     // Sign In Button
@@ -87,13 +101,34 @@ class SignInScreen extends StatelessWidget {
                       width: double.infinity,
                       height: 50,
                       child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const HomeScreen(),
-                            ),
+                        onPressed: () async {
+
+                          bool success = await loginUser(
+                            emailController.text.trim(),
+                            passwordController.text.trim(),
                           );
+
+                          if(success){
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Login success")),
+                            );
+
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => HomeScreen(userEmail: emailController.text.trim()),
+                              ),
+                            );
+
+                          }else{
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Invalid email or password")),
+                            );
+
+                          }
+
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF333333),
@@ -170,7 +205,7 @@ class SignInScreen extends StatelessWidget {
   }
 
   // Reusable input field widget
-  Widget _buildInputField({required String label, required String hint, bool isPassword = false}) {
+  Widget _buildInputField({required String label, required String hint,  required TextEditingController controller, bool isPassword = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -180,6 +215,7 @@ class SignInScreen extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         TextField(
+          controller: controller,
           obscureText: isPassword,
           decoration: InputDecoration(
             hintText: hint,

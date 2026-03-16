@@ -36,8 +36,8 @@ public class SecurityConfig {
             .cors(cors -> {})
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/employees/**").permitAll()
+                .requestMatchers("/api/attendance/**").permitAll()
                 .requestMatchers("/uploads/**").permitAll()       
                 .anyRequest().authenticated()
             )
@@ -48,19 +48,3 @@ public class SecurityConfig {
     }
 
 }
-
-
-//    @Bean
-//     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
-//         http
-//             .csrf(csrf -> csrf.disable())
-//             .authorizeHttpRequests(auth -> auth
-//                 .requestMatchers("/api/auth/**").permitAll()
-//                 .anyRequest().authenticated()
-//             )
-//             .formLogin(form -> form.disable())
-//             .httpBasic(httpBasic -> httpBasic.disable());
-
-//         return http.build();
-//     }

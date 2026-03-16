@@ -24,7 +24,7 @@ function App() {
 
         {/* Protected Admin Routes */}
         <Route
-          path="/admin/*"
+          path="/*"
           element={
             <ProtectedRoute>
               <div className="flex bg-gray-50 font-['Inter'] min-h-screen">
@@ -33,12 +33,12 @@ function App() {
                   <Navbar />
                   <main className="ml-64 mt-20 p-8">
                     <Routes>
-                      <Route path="dashboard" element={<DashboardHome />} />
+                      <Route index element={<DashboardHome />} />
                       <Route path="employee" element={<Employee />} />
-                      <Route path="manualadjustments" element={<ManualAdjustments />} />
+                      <Route path="attendance" element={<AttendanceStatus />} />
                       <Route path="notification" element={<AlertNotifications />} />
+                      <Route path="manualadjustments" element={<ManualAdjustments />} />
                       <Route path="setting" element={<SettingPanel />} />
-                      <Route path="attendence/status" element={<AttendanceStatus />} />
                       <Route path="/" element={<Navigate to="dashboard" />} />
                     </Routes>
                   </main>

@@ -9,17 +9,17 @@ const Sidebar = () => {
   const notificationCount = 3; // <-- you can get this from state or props
 
   const navItems = [
-    { icon: <Home size={20} />, label: 'Today Summary', href: '/admin/dashboard' },
-    { icon: <Users size={20} />, label: 'Employee', href: '/admin/employee' },
-    { icon: <ShoppingBag size={20} />, label: 'Live Attendance Status', href: 'admin/manualadjustments' },
-    { icon: <Users size={20} />, label: 'Manual Adjustments', href: '/admin/manualadjustments' },
+    { icon: <Home size={20} />, label: 'Today Summary', href: '/' },
+    { icon: <Users size={20} />, label: 'Employee', href: '/employee' },
+    { icon: <ShoppingBag size={20} />, label: 'Live Attendance Status', href: '/attendance' },
+    { icon: <Users size={20} />, label: 'Manual Adjustments', href: '/manualadjustments' },
     { 
       icon: <Bell size={20} />, 
       label: 'Alert & Notifications', 
-      href: '/admin/notification',
+      href: '/notification',
       badge: notificationCount, // add badge property
     },
-    { icon: <Settings size={20} />, label: 'Setting Panel', href: '/admin/setting' },
+    { icon: <Settings size={20} />, label: 'Setting Panel', href: '/setting' },
   ];
 
   return (

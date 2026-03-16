@@ -14,7 +14,7 @@ const SignIn = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:8080/api/auth/login", {
+      const response = await fetch("http://localhost:8080/api/employees/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -36,7 +36,7 @@ const SignIn = () => {
         localStorage.setItem("userRole", data.role);
 
         // redirect
-        window.location.href = "/admin/dashboard";
+        window.location.href = "/";
 
       } else {
         alert("Invalid Credentials");

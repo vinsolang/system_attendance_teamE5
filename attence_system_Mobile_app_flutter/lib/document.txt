@@ -5,4 +5,31 @@
 - add dependency
  + shared_preference
  + http
- + 
+ + http_parser
+ + image_picker
+ + device_info_plus
+ + intl
+
+- How to check ip for connect api 
+Check your IP using: ipconfig
+Example for IP to Use: http://10.0.2.2:8080/api/auth/signup
+
+- Flutter Android app cannot call API without internet permission.
+Check in folder: android/app/src/main/AndroidManifest.xml
+Add this above <application>: <uses-permission android:name="android.permission.INTERNET"/>
+
+- Android 9+ blocks http
+Add inside <application> about this: android:usesCleartextTraffic="true"
+
+
+
+2. building a React + Spring Boot + Flutter Attendance System, I can also show you:
+- Professional Login/Register architecture
+- Flutter JWT login system
+- Clean folder structure for Flutter
+- Spring Boot JWT authentication
+
+
+3. Telegram for manage Attendance
+- TELEGRAM_BOT_TOKEN="7587916418:AAEzLlsLWCnIYlo0TPEPm0TRIRpcaP0VEyg"
+- TELEGRAM_CHAT_ID=-4819861863

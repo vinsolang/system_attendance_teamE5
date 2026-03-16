@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:attence_system/auth/logout.dart';
 import 'package:attence_system/page/Attendance/check-in.dart';
 import 'package:attence_system/page/aboutpage.dart';
@@ -6,17 +8,52 @@ import 'package:attence_system/page/helpsupport.dart';
 import 'package:attence_system/page/privacy.dart';
 import 'package:attence_system/page/teamcondition.dart';
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+// Remove the global fetchProfile function and move it inside _HomeScreenState
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final String userEmail; // Add this
+  const HomeScreen({super.key, required this.userEmail}); // Add this
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // 1. This variable tracks which page is currently active
   bool isCategorySelected = true;
+  String fullName = '';
+  String profileImage = '';
+
+  Future<void> fetchUser() async {
+    try {
+      // Use widget.userEmail to get the value passed to the widget
+      final response = await http.get(
+        Uri.parse("http://192.168.3.26:8080/api/employees/${widget.userEmail}"),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          fullName = data['fullName'] ?? 'No Name';
+          profileImage = data['profileImageUrl'] ?? '';
+        });
+      } else {
+        print("Error: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Connection Error: $e");
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    Timer.periodic(Duration(seconds: 5), (timer) {
+      fetchUser();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,40 +116,49 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
+  
   // --- WIDGET: PROFILE HEADER ---
-  Widget _buildProfileHeader(Color accentColor) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(25, 40, 25, 20),
-      child: Row(
-        children: [
-          const CircleAvatar(
-            radius: 38,
-            backgroundColor: Colors.black,
-            child: Icon(Icons.person, size: 45, color: Colors.white),
-          ),
-          const SizedBox(width: 15),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Hi Team E5',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: accentColor,
-                ),
-              ),
-              const Text(
-                'CNP Company Co.Ltd',
-                style: TextStyle(fontSize: 14, color: Colors.grey),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+ Widget _buildProfileHeader(Color accentColor) {
+  // Logic to get initials
+  String initial = "?";
+  if (fullName.isNotEmpty) {
+    initial = fullName[0].toUpperCase();
   }
+  
+
+  return Padding(
+    padding: const EdgeInsets.fromLTRB(25, 40, 25, 20),
+    child: Row(
+      children: [
+        CircleAvatar(
+          radius: 38,
+          backgroundColor: Colors.black,
+          // Check if string is not empty
+          backgroundImage: (profileImage.isNotEmpty)
+              ? NetworkImage("http://192.168.3.26:8080/$profileImage")
+              : null,
+          child: (profileImage.isEmpty)
+              ? Text(
+                  initial,
+                  style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+                )
+              : null,
+        ),
+        const SizedBox(width: 15),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              fullName.isNotEmpty ? fullName : "Loading...",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: accentColor),
+            ),
+            const Text('CNP Company Co.Ltd', style: TextStyle(fontSize: 14, color: Colors.grey)),
+          ],
+        ),
+      ],
+    ),
+  );
+}
 
   // --- WIDGET: CATEGORY GRID (HOME) ---
   Widget _buildCategoryGrid() {
@@ -189,7 +235,12 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const AccountScreen()),
+                MaterialPageRoute(
+                  builder: (context) => AccountScreen(
+                    // Replace 'user@example.com' with your actual email variable
+                    userEmail: widget.userEmail, 
+                  ),
+                ),
               );
             },
           ),

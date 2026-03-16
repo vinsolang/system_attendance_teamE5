@@ -1,4 +1,4 @@
-import React, { useState, useEffect  } from 'react';
+import React, { useState, useEffect } from 'react';
 import EmployeeModal from './EmployeeModal';
 import { Toaster, toast } from "sonner";
 import Swal from "sweetalert2";
@@ -7,9 +7,10 @@ const Employee = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [employees, setEmployees] = useState([]);
   const [editingEmployee, setEditingEmployee] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchEmployees = async () => {
-  try {
+    try {
       const res = await fetch("http://localhost:8080/api/employees");
       const data = await res.json();
       setEmployees(data);
@@ -17,22 +18,23 @@ const Employee = () => {
       console.error("Failed to load employees", err);
     }
   };
+
   useEffect(() => {
     fetchEmployees();
-    }, []);
-    
-   const handleDelete = async (id) => {
+  }, []);
 
-      const result = await Swal.fire({
-        text: "Do you when to delete employee this?",
-        showCancelButton: true,
-        confirmButtonColor: "#e8000c",
-        cancelButtonColor: "#5682e8",
-        confirmButtonText: "Yes, delete"
-      });
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      text: "Are you sure you want to delete this employee?",
+      showCancelButton: true,
+      confirmButtonColor: "#e8000c",
+      cancelButtonColor: "#5682e8",
+      confirmButtonText: "Yes, delete"
+    });
 
-      if (!result.isConfirmed) return;
+    if (!result.isConfirmed) return;
 
+    try {
       const res = await fetch(`http://localhost:8080/api/employees/${id}`, {
         method: "DELETE",
       });
@@ -43,34 +45,38 @@ const Employee = () => {
       } else {
         toast.error("Failed to delete employee");
       }
-    };
+    } catch (err) {
+      toast.error("Network error");
+    }
+  };
 
-  // Calculate the Stats
-  // 1. Total Staff: Simply the length of the array
+  // Filtered Employees for Search
+  const filteredEmployees = employees.filter(emp => 
+    emp.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    emp.employeeId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    emp.department?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Stats Calculations
   const totalStaff = employees.length;
-
-  // 2. Departments: Create a Set of unique department names and get the size
   const totalDepartments = new Set(employees.map(emp => emp.department)).size;
-
-  // 3. Active Now: Filter employees with 'Active' status
   const activeStaff = employees.filter(emp => emp.workStatus === 'Active').length;
-
-  // 4. New Hires: Assuming "New Hires" are those joined in the last 30 days
-  // Or, if you prefer, filter by a specific status like 'Probation'
   const newHires = employees.filter(emp => {
     const joinDate = new Date(emp.joinDate);
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     return joinDate > thirtyDaysAgo;
   }).length;
+
   return (
     <div className="p-8 bg-[#D1D5DB] min-h-screen rounded-tl-[40px] space-y-8">
       <Toaster position="top-right" />
+      
       {/* Top Action Bar */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Employee Directory</h1>
-          <p className="text-sm text-gray-500 font-medium">Manage your workforce of 200 employees</p>
+          <p className="text-sm text-gray-500 font-medium">Managing {totalStaff} team members</p>
         </div>
         
         <div className="flex items-center gap-3 w-full md:w-auto">
@@ -81,22 +87,23 @@ const Employee = () => {
             <input 
               type="text" 
               placeholder="Search by name, ID, or dept..." 
-              className="w-full md:w-80 bg-white/60 backdrop-blur-sm border-none rounded-2xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-gray-300 transition-all"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full md:w-80 bg-white/60 backdrop-blur-sm border-none rounded-2xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-gray-300 transition-all outline-none"
             />
           </div>
           <button 
             onClick={() => {
-              setEditingEmployee(null); // Ensure we aren't in edit mode
-              setModalOpen(true);       // Open the modal
+              setEditingEmployee(null);
+              setModalOpen(true);
             }}
             className="cursor-pointer bg-gray-800 text-white p-3 px-6 rounded-2xl flex items-center gap-2 hover:bg-black shadow-lg shadow-gray-400/40 transition-all">
             <span className="text-lg font-light">+</span>
-            <span className="text-sm font-bold">
-              {editingEmployee ? "Update Employee" : "Add New Employee"}
-            </span>
+            <span className="text-sm font-bold">Add Employee</span>
           </button>
         </div>
-        {/* Render the Modal */}
+      </div>
+
       <EmployeeModal
         isOpen={isModalOpen}
         onClose={() => {
@@ -106,32 +113,23 @@ const Employee = () => {
         employee={editingEmployee}
         refreshEmployees={fetchEmployees}
       />
-      </div>
 
       {/* Stats Overview */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white/40 border border-white/60 p-4 rounded-3xl flex flex-col items-center">
-          <span className="text-2xl font-black text-gray-800">{totalStaff}</span>
-          <span className="text-[10px] uppercase font-bold text-gray-500 tracking-widest">Total Staff</span>
-        </div>
-        
-        <div className="bg-white/40 border border-white/60 p-4 rounded-3xl flex flex-col items-center">
-          <span className="text-2xl font-black text-gray-800">{totalDepartments}</span>
-          <span className="text-[10px] uppercase font-bold text-gray-500 tracking-widest">Departments</span>
-        </div>
-        
-        <div className="bg-white/40 border border-white/60 p-4 rounded-3xl flex flex-col items-center">
-          <span className="text-2xl font-black text-green-600">{activeStaff}</span>
-          <span className="text-[10px] uppercase font-bold text-gray-500 tracking-widest">Active Now</span>
-        </div>
-        
-        <div className="bg-white/40 border border-white/60 p-4 rounded-3xl flex flex-col items-center">
-          <span className="text-2xl font-black text-blue-600">{newHires}</span>
-          <span className="text-[10px] uppercase font-bold text-gray-500 tracking-widest">New Hires</span>
-        </div>
+        {[
+          { label: "Total Staff", val: totalStaff, color: "text-gray-800" },
+          { label: "Departments", val: totalDepartments, color: "text-gray-800" },
+          { label: "Active Now", val: activeStaff, color: "text-green-600" },
+          { label: "New Hires", val: newHires, color: "text-blue-600" },
+        ].map((stat, i) => (
+          <div key={i} className="bg-white/40 border border-white/60 p-4 rounded-3xl flex flex-col items-center">
+            <span className={`text-2xl font-black ${stat.color}`}>{stat.val}</span>
+            <span className="text-[10px] uppercase font-bold text-gray-500 tracking-widest">{stat.label}</span>
+          </div>
+        ))}
       </div>
 
-      {/* Employee Grid/Table */}
+      {/* Employee Table */}
       <div className="bg-white rounded-[40px] shadow-sm overflow-hidden border border-gray-100">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
@@ -145,39 +143,51 @@ const Employee = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {employees.map((emp) => (
+              {filteredEmployees.map((emp) => (
                 <tr key={emp.id} className="group hover:bg-gray-50/80 transition-all duration-300">
                   <td className="px-8 py-5">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 border border-white shadow-sm flex items-center justify-center text-gray-400 font-bold group-hover:scale-105 transition-transform">
+                      {/* Profile Image or Initials */}
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 border border-white shadow-sm flex items-center justify-center text-gray-400 font-bold group-hover:scale-105 transition-transform overflow-hidden">
                        {emp.profileImageUrl ? (
                           <img
-                            src={`http://localhost:8080/${emp.profileImageUrl}`}
+                            src={`http://localhost:8080/${emp.profileImageUrl}?t=${new Date().getTime()}`}
                             alt={emp.fullName}
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <span className="text-lg uppercase">{emp.fullName.charAt(0)}</span>
+                          <span className="text-sm uppercase">
+                            {emp.fullName?.split(" ").map(n => n[0]).join("").substring(0, 2)}
+                          </span>
                         )}
                       </div>
-                      <div>
+                      
+                      <div className="flex flex-col">
                         <p className="text-sm font-bold text-gray-800">{emp.fullName}</p>
-                        <p className="text-[10px] text-gray-400 font-medium tracking-wide">ID: {emp.employeeId} • Joined {emp.joinDate}</p>
+                        <p className="text-[10px] text-gray-400">{emp.email}</p>
+                        <p className="text-[10px] text-indigo-500 font-semibold uppercase tracking-tighter">
+                          {emp.role}
+                        </p>
+                        <p className="text-[10px] text-gray-400">ID: {emp.employeeId} • Joined {emp.joinDate}</p>
                       </div>
                     </div>
                   </td>
+                  
                   <td className="px-8 py-5">
                     <span className="text-xs font-semibold text-gray-600 px-3 py-1 bg-gray-100 rounded-lg">{emp.department}</span>
                   </td>
+                  
                   <td className="px-8 py-5 text-sm text-gray-500 font-medium">
                     {emp.position}
                   </td>
+                  
                   <td className="px-8 py-5">
                     <div className="flex items-center gap-2">
-                      <div className={`w-1.5 h-1.5 rounded-full ${emp.workStatus   === 'Active' ? 'bg-green-500' : 'bg-orange-400'}`}></div>
-                      <span className="text-[11px] font-bold text-gray-700">{emp.workStatus }</span>
+                      <div className={`w-1.5 h-1.5 rounded-full ${emp.workStatus === 'Active' ? 'bg-green-500' : 'bg-orange-400'}`}></div>
+                      <span className="text-[11px] font-bold text-gray-700">{emp.workStatus}</span>
                     </div>
                   </td>
+                  
                   <td className="px-8 py-5 text-right">
                     <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button 
@@ -199,16 +209,11 @@ const Employee = () => {
               ))}
             </tbody>
           </table>
-        </div>
-        
-        {/* Pagination Placeholder */}
-        <div className="p-6 bg-gray-50/30 flex justify-between items-center border-t border-gray-50">
-          <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Showing 1 to 4 of 200</span>
-          <div className="flex gap-2">
-            <button className="w-8 h-8 rounded-lg bg-white border border-gray-200 text-gray-400 hover:bg-gray-800 hover:text-white transition-all text-xs font-bold">1</button>
-            <button className="w-8 h-8 rounded-lg bg-white border border-gray-200 text-gray-400 hover:bg-gray-800 hover:text-white transition-all text-xs font-bold">2</button>
-            <button className="w-8 h-8 rounded-lg bg-white border border-gray-200 text-gray-400 hover:bg-gray-800 hover:text-white transition-all text-xs font-bold">3</button>
-          </div>
+          {filteredEmployees.length === 0 && (
+            <div className="p-20 text-center text-gray-400 text-sm font-medium">
+              No employees found matching your search.
+            </div>
+          )}
         </div>
       </div>
     </div>

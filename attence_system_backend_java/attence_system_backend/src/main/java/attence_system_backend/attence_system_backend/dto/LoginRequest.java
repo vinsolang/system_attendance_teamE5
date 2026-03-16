@@ -1,10 +1,8 @@
 package attence_system_backend.attence_system_backend.dto;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter @Setter @NoArgsConstructor
+@Data
 public class LoginRequest {
     private String email;
     private String password;

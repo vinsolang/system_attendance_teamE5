@@ -3,10 +3,9 @@ import React, { useState } from 'react';
 const SignUp = () => {
 
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    fullName: '',
     email: '',
-    role: 'HR Manager',
+    role: 'ADMIN',
     password: ''
   });
 
@@ -22,7 +21,7 @@ const SignUp = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:8080/api/auth/signup', {
+      const response = await fetch('http://localhost:8080/api/employees/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -59,22 +58,13 @@ const SignUp = () => {
 
           <form onSubmit={handleRegister} className="space-y-5">
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
 
               <input
                 type="text"
-                name="firstName"
-                placeholder="First Name"
-                value={formData.firstName}
-                onChange={handleChange}
-                className="w-full bg-gray-50 rounded-xl px-4 py-3"
-              />
-
-              <input
-                type="text"
-                name="lastName"
-                placeholder="Last Name"
-                value={formData.lastName}
+                name="fullName"
+                placeholder="Enter Full Name"
+                value={formData.fullName}
                 onChange={handleChange}
                 className="w-full bg-gray-50 rounded-xl px-4 py-3"
               />
@@ -96,8 +86,8 @@ const SignUp = () => {
               onChange={handleChange}
               className="w-full bg-gray-50 rounded-xl px-4 py-3"
             >
-              <option>HR Manager</option>
-              <option>IT Administrator</option>
+              <option>ADMIN</option>
+              <option>EMPLOYEE</option>
               <option>General Manager</option>
             </select>
 

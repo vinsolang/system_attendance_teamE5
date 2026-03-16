@@ -9,7 +9,7 @@ function ProtectedRoute({ children }) {
     return <Navigate to="/signin" replace />;
   }
 
-  if (role !== "Admin" && role !== "HR Manager") {
+  if (role !== "Admin" && role !== "ADMIN") {
     return <Navigate to="/signin" replace />;
   }
 

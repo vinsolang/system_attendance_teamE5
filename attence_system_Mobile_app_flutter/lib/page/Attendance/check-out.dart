@@ -1,186 +1,122 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const AttendanceApp());
-}
-
-class AttendanceApp extends StatelessWidget {
-  const AttendanceApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(useMaterial3: true),
-      home: const AttendanceScreen(),
-    );
-  }
-}
-
 class AttendanceScreen extends StatelessWidget {
   const AttendanceScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Colors based on the image
-    const Color cardBg = Color(0xFFF4EBF7);
-    const Color scaffoldBg = Color(0xFFF9F7FA);
-
     return Scaffold(
-      backgroundColor: scaffoldBg,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Column(
-            children: [
-              // Header
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20.0),
-                child: Row(
-                  children: [
-                    const Icon(Icons.arrow_back_ios, size: 18),
-                    const Text("Back", style: TextStyle(fontSize: 16)),
-                    const Spacer(),
-                    const Text(
-                      "My Attendance",
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                    ),
-                    const Spacer(flex: 2),
-                  ],
-                ),
-              ),
-
-              // Current Date Card
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: cardBg,
-                  borderRadius: BorderRadius.circular(25),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "30 October 2025",
-                      style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: const [
-                        Icon(Icons.check, size: 20),
-                        SizedBox(width: 8),
-                        Text("Check-in:", style: TextStyle(fontSize: 18)),
-                      ],
-                    ),
-                    const SizedBox(height: 30), // Space for inner card height
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 40),
-
-              // Action Section (Pill and Map)
-              Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.circular(40),
-                    ),
-                    child: Column(
-                      children: const [
-                        Text(
-                          "Check-in",
-                          style: TextStyle(color: Colors.white70, fontSize: 14),
-                        ),
-                        Text(
-                          "7:45 AM",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    "Open map",
-                    style: TextStyle(
-                      decoration: TextDecoration.underline,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    "Your location is not available!",
-                    style: TextStyle(color: Colors.black54, fontSize: 12),
-                  ),
-                ],
-              ),
-
-              const Spacer(),
-
-              // Attendance History Section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Your Attendance",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text("See More", style: TextStyle(color: Colors.black54)),
-                  ),
-                ],
-              ),
-
-              // History Card
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: cardBg,
-                  borderRadius: BorderRadius.circular(25),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "29 October 2025",
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 15),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _buildTimeColumn("Check-in:", "7:48 AM"),
-                        _buildTimeColumn("Check-out:", "5:10 PM"),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
+      backgroundColor: const Color(0xFFF3F2F8), // Light grayish background
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        leading: TextButton.icon(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back_ios, size: 16, color: Colors.black),
+          label: const Text("Back", style: TextStyle(color: Colors.black)),
+        ),
+        title: const Text(
+          "My Attendance",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
-    );
-  }
-
-  Widget _buildTimeColumn(String label, String time) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-        const SizedBox(height: 5),
-        Text(time, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
-      ],
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
+            // --- MAIN ATTENDANCE CARD ---
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5EBF5), // Light lavender/pinkish color
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Text(
+                      "30 October 2025",
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black.withOpacity(0.8),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Row(
+                    children: [
+                      Icon(Icons.check, size: 20, color: Colors.black),
+                      SizedBox(width: 8),
+                      Text(
+                        "Check-in:",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(left: 28, top: 8),
+                    child: Text(
+                      "Time: 7:45 AM",
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Row(
+                    children: [
+                      Icon(Icons.check, size: 20, color: Colors.black),
+                      SizedBox(width: 8),
+                      Text(
+                        "Check-out:",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 80),
+            // --- CHECK-OUT BUTTON ---
+            Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "Check-out",
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                    ),
+                    Text(
+                      "5:15 PM",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
