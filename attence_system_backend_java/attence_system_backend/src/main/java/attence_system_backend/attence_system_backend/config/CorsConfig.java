@@ -16,7 +16,7 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
 
-       config.setAllowedOriginPatterns(List.of("http://localhost:*"));
+       config.setAllowedOriginPatterns(List.of("*"));
 
         config.setAllowedHeaders(List.of("*"));
         config.setAllowedMethods(List.of("*"));
@@ -26,4 +26,5 @@ public class CorsConfig {
 
         return new CorsFilter(source);
     }
+    
 }

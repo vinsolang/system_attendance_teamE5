@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:attence_system/auth/forgotpassword.dart';
 import 'package:attence_system/page/home.dart';
 import 'package:attence_system/scanqr/scanqr.dart';
+import 'package:attence_system/services/api_config.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,25 +10,32 @@ import 'package:shared_preferences/shared_preferences.dart';
 // login.dart logic snippet
 Future<bool> loginUser(String email, String password) async {
   try {
-    final url = Uri.parse('http://192.168.3.26:8080/api/employees/login');
+    final url = Uri.parse('${ApiConfig.baseUrl}/api/employees/login');
 
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email, 'password': password}),
+      body: jsonEncode({
+        'email': email,
+        'password': password
+      }),
     );
 
     if (response.statusCode == 200) {
+
       final data = jsonDecode(response.body);
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('userEmail', email);
+      await prefs.setString('userEmail', data['email'] ?? '');
       await prefs.setString('userRole', data['role'] ?? '');
-
+      await prefs.setString('userId', data['employeeId']?.toString() ?? '');
       return true;
+
     } else {
+      print("Login failed: ${response.body}");
       return false;
     }
+
   } catch (e) {
     print("Login error: $e");
     return false;
@@ -118,6 +126,7 @@ class SignInScreen extends StatelessWidget {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => HomeScreen(userEmail: emailController.text.trim()),
+                                
                               ),
                             );
 

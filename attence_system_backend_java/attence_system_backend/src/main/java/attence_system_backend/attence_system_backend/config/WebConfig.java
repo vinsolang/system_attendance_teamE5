@@ -1,5 +1,6 @@
 package attence_system_backend.attence_system_backend.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -15,11 +16,17 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
     // Allow Flutter (Web and Mobile) to talk to the API ---
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**") // Allow all endpoints
-                .allowedOrigins("*") // In production, replace * with your domain
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("*");
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+
+                registry.addMapping("/**")
+                        .allowedOrigins("*")
+                        .allowedMethods("GET","POST","PUT","DELETE","OPTIONS")
+                        .allowedHeaders("*");
+            }
+        };
     }
 }

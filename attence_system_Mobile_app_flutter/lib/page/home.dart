@@ -1,12 +1,18 @@
 import 'dart:async';
 
 import 'package:attence_system/auth/logout.dart';
-import 'package:attence_system/page/Attendance/check-in.dart';
+import 'package:attence_system/page/Attendance/check_in_out.dart';
 import 'package:attence_system/page/aboutpage.dart';
 import 'package:attence_system/page/account.dart';
+import 'package:attence_system/page/calendar.dart';
 import 'package:attence_system/page/helpsupport.dart';
+import 'package:attence_system/page/leave.dart';
+import 'package:attence_system/page/leavl_report.dart';
+import 'package:attence_system/page/member.dart';
+import 'package:attence_system/page/notification_bot.dart';
 import 'package:attence_system/page/privacy.dart';
 import 'package:attence_system/page/teamcondition.dart';
+import 'package:attence_system/services/api_config.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -14,8 +20,8 @@ import 'package:http/http.dart' as http;
 // Remove the global fetchProfile function and move it inside _HomeScreenState
 
 class HomeScreen extends StatefulWidget {
-  final String userEmail; // Add this
-  const HomeScreen({super.key, required this.userEmail}); // Add this
+  final String userEmail; 
+  const HomeScreen({super.key, required this.userEmail}); 
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -25,35 +31,55 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isCategorySelected = true;
   String fullName = '';
   String profileImage = '';
+  String userEmployeeId = '';
+
+  
 
   Future<void> fetchUser() async {
-    try {
-      // Use widget.userEmail to get the value passed to the widget
-      final response = await http.get(
-        Uri.parse("http://192.168.3.26:8080/api/employees/${widget.userEmail}"),
-      );
+  try {
+    final response = await http.get(
+      Uri.parse("${ApiConfig.baseUrl}/api/employees/${widget.userEmail}"),
+    );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          fullName = data['fullName'] ?? 'No Name';
-          profileImage = data['profileImageUrl'] ?? '';
-        });
-      } else {
-        print("Error: ${response.statusCode}");
-      }
-    } catch (e) {
-      print("Connection Error: $e");
+    print("EMAIL: ${widget.userEmail}");
+    print("STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
+    if (response.statusCode == 200) {
+
+      final data = jsonDecode(response.body);
+
+      setState(() {
+        fullName = data['fullName'];
+        profileImage = data['profileImageUrl'];
+        userEmployeeId = data['employeeId'].toString(); // Store employee ID as string
+      });
+
     }
-  }
 
-  @override
-  void initState() {
-    super.initState();
-    Timer.periodic(Duration(seconds: 5), (timer) {
-      fetchUser();
-    });
+  } catch (e) {
+    print("Connection Error: $e");
   }
+}
+
+  late Timer timer;
+
+@override
+void initState() {
+  super.initState();
+
+  fetchUser();
+
+  timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+    fetchUser();
+  });
+}
+
+@override
+void dispose() {
+  timer.cancel();
+  super.dispose();
+}
 
   @override
   Widget build(BuildContext context) {
@@ -132,10 +158,10 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         CircleAvatar(
           radius: 38,
-          backgroundColor: Colors.black,
+          backgroundColor: Colors.grey.withOpacity(0.3),
           // Check if string is not empty
           backgroundImage: (profileImage.isNotEmpty)
-              ? NetworkImage("http://192.168.3.26:8080/$profileImage")
+              ? NetworkImage("${ApiConfig.baseUrl}/$profileImage")
               : null,
           child: (profileImage.isEmpty)
               ? Text(
@@ -175,10 +201,19 @@ class _HomeScreenState extends State<HomeScreen> {
             Icons.calendar_today_rounded,
             'My Attendance',
             onTap: () {
+              if (userEmployeeId.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("User not loaded yet")),
+                );
+                return;
+              }
+
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const AttendanceApp(),
+                  builder: (context) => AttendancePage(
+                    // loggedInUserId: userEmployeeId,
+                  ),
                 ),
               );
             },
@@ -190,7 +225,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => SignOutScreen()),
+                MaterialPageRoute(builder: (context) => MyLeavePage()),
               );
             },
           ),
@@ -202,7 +237,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const SignOutScreen(),
+                  builder: (context) => const LeaveReportPage(),
                 ),
               );
             },
@@ -211,12 +246,27 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildPremiumCard(
             Icons.auto_awesome_rounded,
             'Notification Bot',
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const NotificationBotPage()),
+              );
+            },
           ),
 
-          _buildPremiumCard(Icons.event_note_rounded, 'Calendar', onTap: () {}),
+          _buildPremiumCard(Icons.event_note_rounded, 'Calendar', onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const CalendarPage()),
+            );
+          }),
 
-          _buildPremiumCard(Icons.face_6_rounded, 'Member', onTap: () {}),
+          _buildPremiumCard(Icons.face_6_rounded, 'Member', onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const MemberPage()),
+            );
+          }),
         ],
       ),
     );

@@ -2,6 +2,8 @@ package attence_system_backend.attence_system_backend.models;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -57,7 +59,8 @@ public class Employee {
     private String employmentType;
 
      // Relationship with attendance
-    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
-    private List<Attendance> attendances;
+@OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
+@JsonIgnore
+private List<Attendance> attendances;
 
 }

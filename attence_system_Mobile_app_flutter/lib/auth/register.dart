@@ -1,6 +1,7 @@
 // RegisterScreen.dart
 import 'dart:convert';
 import 'package:attence_system/auth/login.dart';
+import 'package:attence_system/services/api_config.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -21,8 +22,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<bool> registerUser() async {
     try {
-      final url = Uri.parse('http://192.168.3.26:8080/api/employees/signup');
-
+      final url = Uri.parse('${ApiConfig.baseUrl}/api/employees/login');
+      
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},

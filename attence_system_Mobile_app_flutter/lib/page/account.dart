@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:attence_system/services/api_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -25,7 +26,7 @@ class _AccountScreenState extends State<AccountScreen> {
 
   String get baseUrl {
     if (kIsWeb) return "http://localhost:8080";
-    return "http://10.0.2.2:8080";
+    return "${ApiConfig.baseUrl}"; // Android emulator
   }
 
   /// Controllers

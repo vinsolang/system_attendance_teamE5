@@ -1,32 +1,37 @@
+import 'package:attence_system/auth/login.dart';
+import 'package:attence_system/services/api_config.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> logout(BuildContext context) async {
-  const String baseUrl = "http://10.0.2.2:8080"; // Android emulator
+  final prefs = await SharedPreferences.getInstance();
 
   try {
+    final token = prefs.getString('token');
+
     final response = await http.post(
-      Uri.parse("$baseUrl/api/logout"),
+      Uri.parse("${ApiConfig.baseUrl}/api/employees/logout"),
       headers: {
         "Content-Type": "application/json",
+        if (token != null) "Authorization": "Bearer $token",
       },
     );
 
-    if (response.statusCode == 200) {
+    print("Status: ${response.statusCode}");
 
-      // Navigate to SignInScreen and remove all routes
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        '/signin',
-        (route) => false,
-      );
-
-    } else {
-      print("Logout failed");
-    }
   } catch (e) {
     print("Logout Error: $e");
   }
+
+  // ✅ ALWAYS logout locally
+  await prefs.clear();
+
+  // ✅ REDIRECT to SignInScreen
+  Navigator.of(context).pushAndRemoveUntil(
+    MaterialPageRoute(builder: (context) => const SignInScreen()),
+    (route) => false,
+  );
 }
 class SignOutScreen extends StatelessWidget {
   const SignOutScreen({super.key});

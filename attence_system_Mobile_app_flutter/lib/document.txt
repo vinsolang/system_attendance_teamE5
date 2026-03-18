@@ -33,3 +33,8 @@ Add inside <application> about this: android:usesCleartextTraffic="true"
 3. Telegram for manage Attendance
 - TELEGRAM_BOT_TOKEN="7587916418:AAEzLlsLWCnIYlo0TPEPm0TRIRpcaP0VEyg"
 - TELEGRAM_CHAT_ID=-4819861863
+
+
+Email and Pasword for Login
+Email: admin9@gmail.com
+Pasword: 123solang@1234

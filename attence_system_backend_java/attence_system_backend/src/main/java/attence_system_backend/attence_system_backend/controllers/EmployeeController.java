@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import attence_system_backend.attence_system_backend.models.Employee;
+import attence_system_backend.attence_system_backend.dto.LoginRequest;
 import attence_system_backend.attence_system_backend.dto.LoginResponse;
 import attence_system_backend.attence_system_backend.dto.SignUpRequest;
 import attence_system_backend.attence_system_backend.repository.EmployeeRepository;
@@ -52,8 +53,7 @@ public class EmployeeController {
 
     // --- AUTHENTICATION METHODS --
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody SignUpRequest request) {
-        // Now searching for the email directly in the Employee table
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         Optional<Employee> optionalEmp = employeeRepository.findByEmail(request.getEmail());
 
         if (optionalEmp.isEmpty()) {
@@ -63,7 +63,7 @@ public class EmployeeController {
         Employee emp = optionalEmp.get();
 
         if (passwordEncoder.matches(request.getPassword(), emp.getPassword())) {
-            String token = "sample_token_123"; // In production, generate a real JWT
+            String token = "sample_token_123"; // In production, generate JWT
 
             LoginResponse response = new LoginResponse(
                     "Login success",
