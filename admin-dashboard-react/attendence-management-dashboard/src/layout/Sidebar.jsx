@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Bell, Home, Settings, ShoppingBag, Users } from 'lucide-react';
+import { Bell, Home, LeafIcon, Settings, ShoppingBag, Users } from 'lucide-react';
 
 const Sidebar = () => {
   const location = useLocation();
@@ -13,6 +13,7 @@ const Sidebar = () => {
     { icon: <Users size={20} />, label: 'Employee', href: '/employee' },
     { icon: <ShoppingBag size={20} />, label: 'Live Attendance Status', href: '/attendance' },
     { icon: <Users size={20} />, label: 'Manual Adjustments', href: '/manualadjustments' },
+    { icon: <LeafIcon size={20} />, label: 'Leave Requests', href: '/leaverequests' },
     { 
       icon: <Bell size={20} />, 
       label: 'Alert & Notifications', 

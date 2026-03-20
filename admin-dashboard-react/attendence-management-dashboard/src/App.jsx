@@ -11,6 +11,7 @@ import SettingPanel from './page/SettingPanel';
 import SignIn from './auth/SignIn';
 import SignUp from './auth/SignUp';
 import ProtectedRoute from './auth/ProtectedRoute';
+import LeaveRequests from './page/LeaveRequests';
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
                       <Route path="attendance" element={<AttendanceStatus />} />
                       <Route path="notification" element={<AlertNotifications />} />
                       <Route path="manualadjustments" element={<ManualAdjustments />} />
+                      <Route path="leaverequests" element={<LeaveRequests />} />
                       <Route path="setting" element={<SettingPanel />} />
                       <Route path="/" element={<Navigate to="dashboard" />} />
                     </Routes>

@@ -46,6 +46,7 @@ public class SecurityConfig {
                  .requestMatchers("/api/**").permitAll()
                 // Permit all API endpoints
                 .requestMatchers("/api/employees/**").permitAll()
+                .requestMatchers("/api/leaves/**").permitAll()
                 .requestMatchers("/api/attendance/**").permitAll()
                 .requestMatchers("/uploads/**").permitAll()
 

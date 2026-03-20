@@ -24,10 +24,10 @@ Future<void> logout(BuildContext context) async {
     print("Logout Error: $e");
   }
 
-  // ✅ ALWAYS logout locally
+  //  ALWAYS logout locally
   await prefs.clear();
 
-  // ✅ REDIRECT to SignInScreen
+  //  REDIRECT to SignInScreen
   Navigator.of(context).pushAndRemoveUntil(
     MaterialPageRoute(builder: (context) => const SignInScreen()),
     (route) => false,
